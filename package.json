@@ -1,0 +1,17 @@
+{
+  "name": "christmas-3d-scene",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "High-quality Christmas themed 3D interactive scene with Three.js and WebGPU",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.10"
+  }
+}
