@@ -7,6 +7,7 @@ import { ChristmasTree } from './objects/ChristmasTree.js';
 import { Ground } from './objects/Ground.js';
 import { GiftBoxes } from './objects/GiftBoxes.js';
 import { SnowSystem } from './systems/SnowSystem.js';
+import { GoldParticleSystem } from './systems/GoldParticleSystem.js';
 import { LightingSystem } from './systems/LightingSystem.js';
 import { AudioManager } from './systems/AudioManager.js';
 import { PerformanceMonitor } from './utils/PerformanceMonitor.js';
@@ -33,6 +34,7 @@ class ChristmasApp {
 
         // Systems
         this.snowSystem = null;
+        this.goldParticleSystem = null;
         this.lightingSystem = null;
 
         // State
@@ -90,15 +92,21 @@ class ChristmasApp {
         this.updateLoadingBar(55);
         this.updateLoadingText('Adding gifts...');
 
-        // Create gift boxes
-        this.giftBoxes = new GiftBoxes(this.sceneManager.scene);
-        this.giftBoxes.create();
-        this.updateLoadingBar(65);
-        this.updateLoadingText('Initializing snow...');
-
         // Create snow system
         this.snowSystem = new SnowSystem(this.sceneManager.scene);
         this.snowSystem.create();
+        this.updateLoadingBar(60);
+        this.updateLoadingText('Initializing gold particles...');
+
+        // Create gold particle system
+        this.goldParticleSystem = new GoldParticleSystem(this.sceneManager.scene);
+        this.goldParticleSystem.create();
+        this.updateLoadingBar(65);
+        this.updateLoadingText('Adding gifts...');
+
+        // Create gift boxes (after gold particle system so we can pass it)
+        this.giftBoxes = new GiftBoxes(this.sceneManager.scene, this.goldParticleSystem);
+        this.giftBoxes.create();
         this.updateLoadingBar(75);
         this.updateLoadingText('Setting up lighting...');
 
@@ -323,6 +331,9 @@ class ChristmasApp {
         // Update snow system
         this.snowSystem.update(deltaTime);
 
+        // Update gold particle system
+        this.goldParticleSystem.update(deltaTime);
+
         // Update lighting system
         this.lightingSystem.update(deltaTime);
     }
@@ -360,6 +371,7 @@ class ChristmasApp {
         this.ground?.dispose();
         this.giftBoxes?.dispose();
         this.snowSystem?.dispose();
+        this.goldParticleSystem?.dispose();
         this.lightingSystem?.dispose();
         this.audioManager?.dispose();
         this.sceneManager?.dispose();
