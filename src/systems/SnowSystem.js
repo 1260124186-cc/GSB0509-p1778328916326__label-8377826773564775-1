@@ -186,6 +186,33 @@ export class SnowSystem {
         this.windStrength = strength;
     }
 
+    burstAt(position, count = 15) {
+        if (!this.enabled) return;
+
+        const burstCount = Math.min(count, this.snowflakes.length);
+        for (let i = 0; i < burstCount; i++) {
+            const sprite = this.snowflakes[i];
+            if (!sprite) continue;
+
+            sprite.position.set(
+                position.x + (Math.random() - 0.5) * 0.5,
+                position.y + Math.random() * 0.3,
+                position.z + (Math.random() - 0.5) * 0.5
+            );
+
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 1.0 + Math.random() * 2.0;
+            sprite.userData.velocity.set(
+                Math.cos(angle) * speed * 0.5,
+                speed,
+                Math.sin(angle) * speed * 0.5
+            );
+
+            const burstSize = sprite.userData.baseSize * 1.5;
+            sprite.scale.set(burstSize, burstSize, 1);
+        }
+    }
+
     setParticleCount(count) {
         const particleCountEl = document.getElementById('particle-count');
         if (particleCountEl) {

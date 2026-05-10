@@ -53,11 +53,11 @@ export class AudioManager {
             await this.audioContext.resume();
         }
 
-        // Generate short sounds synchronously (they're small)
         if (!this.bellsBuffer) {
             this.bellsBuffer = this.generateBellSound();
             this.clickBuffer = this.generateClickSound();
             this.chimeBuffer = this.generateChimeSound();
+            this.giftOpenBuffer = this.generateGiftOpenSound();
         }
     }
 
@@ -336,6 +336,55 @@ export class AudioManager {
         }
     }
 
+    generateGiftOpenSound() {
+        const sampleRate = this.audioContext.sampleRate;
+        const duration = 1.2;
+        const buffer = this.audioContext.createBuffer(2, sampleRate * duration, sampleRate);
+
+        for (let channel = 0; channel < 2; channel++) {
+            const data = buffer.getChannelData(channel);
+
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                let sample = 0;
+
+                const whooshFreq = 200 + t * 3000;
+                const whooshEnv = Math.exp(-t * 4) * Math.min(t * 30, 1);
+                sample += (Math.random() * 2 - 1) * whooshEnv * 0.15;
+                sample += Math.sin(2 * Math.PI * whooshFreq * t) * whooshEnv * 0.1;
+
+                const sparkleStart = 0.15;
+                if (t > sparkleStart) {
+                    const st = t - sparkleStart;
+                    const sparkleFreqs = [1200, 1800, 2400, 3000, 3600];
+                    sparkleFreqs.forEach((freq, idx) => {
+                        const noteStart = idx * 0.08;
+                        if (st > noteStart) {
+                            const nt = st - noteStart;
+                            const env = Math.exp(-nt * 5) * Math.min(nt * 40, 1);
+                            sample += Math.sin(2 * Math.PI * freq * nt) * env * 0.08;
+                        }
+                    });
+                }
+
+                const revealStart = 0.3;
+                if (t > revealStart) {
+                    const rt = t - revealStart;
+                    const revealEnv = Math.exp(-rt * 2) * Math.min(rt * 10, 1);
+                    sample += Math.sin(2 * Math.PI * 523.25 * rt) * revealEnv * 0.15;
+                    sample += Math.sin(2 * Math.PI * 659.25 * rt) * revealEnv * 0.1;
+                    sample += Math.sin(2 * Math.PI * 783.99 * rt) * revealEnv * 0.08;
+                    sample += Math.sin(2 * Math.PI * 1046.5 * rt) * revealEnv * 0.05;
+                }
+
+                sample = Math.tanh(sample * 2) * 0.5;
+                data[i] = sample;
+            }
+        }
+
+        return buffer;
+    }
+
     async playInteraction() {
         if (!this.enabled) return;
 
@@ -390,6 +439,26 @@ export class AudioManager {
         source.start();
     }
 
+    async playGiftOpen() {
+        if (!this.enabled) return;
+
+        await this.ensureAudioContext();
+        if (!this.giftOpenBuffer) return;
+
+        const source = this.audioContext.createBufferSource();
+        source.buffer = this.giftOpenBuffer;
+
+        const gain = this.audioContext.createGain();
+        gain.gain.value = this.volume * 0.6;
+
+        source.connect(gain);
+        gain.connect(this.audioContext.destination);
+
+        source.start();
+
+        this.playBell();
+    }
+
     setVolume(value) {
         this.volume = Math.max(0, Math.min(1, value));
         if (this.gainNode) {
@@ -419,5 +488,6 @@ export class AudioManager {
         this.bellsBuffer = null;
         this.clickBuffer = null;
         this.chimeBuffer = null;
+        this.giftOpenBuffer = null;
     }
 }

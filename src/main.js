@@ -208,7 +208,7 @@ class ChristmasApp {
         // Check gift box collision
         const collision = this.giftBoxes.checkCollision(this.raycaster);
         if (collision) {
-            this.giftBoxes.onSelect(collision.giftIndex, this.audioManager);
+            this.giftBoxes.onSelect(collision.giftIndex, this.audioManager, this.snowSystem);
         }
     }
 
