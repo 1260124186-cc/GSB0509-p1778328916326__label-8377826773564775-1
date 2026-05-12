@@ -7,6 +7,7 @@ import { ChristmasTree } from './objects/ChristmasTree.js';
 import { Ground } from './objects/Ground.js';
 import { GiftBoxes } from './objects/GiftBoxes.js';
 import { SnowSystem } from './systems/SnowSystem.js';
+import { GoldParticles } from './systems/GoldParticles.js';
 import { LightingSystem } from './systems/LightingSystem.js';
 import { AudioManager } from './systems/AudioManager.js';
 import { PerformanceMonitor } from './utils/PerformanceMonitor.js';
@@ -33,6 +34,7 @@ class ChristmasApp {
 
         // Systems
         this.snowSystem = null;
+        this.goldParticles = null;
         this.lightingSystem = null;
 
         // State
@@ -90,10 +92,15 @@ class ChristmasApp {
         this.updateLoadingBar(55);
         this.updateLoadingText('Adding gifts...');
 
+        // Create gold particles system
+        this.goldParticles = new GoldParticles(this.sceneManager.scene);
+        this.goldParticles.initPool();
+        this.updateLoadingBar(62);
+
         // Create gift boxes
-        this.giftBoxes = new GiftBoxes(this.sceneManager.scene);
+        this.giftBoxes = new GiftBoxes(this.sceneManager.scene, this.goldParticles);
         this.giftBoxes.create();
-        this.updateLoadingBar(65);
+        this.updateLoadingBar(68);
         this.updateLoadingText('Initializing snow...');
 
         // Create snow system
@@ -323,6 +330,9 @@ class ChristmasApp {
         // Update snow system
         this.snowSystem.update(deltaTime);
 
+        // Update gold particles system
+        this.goldParticles.update(deltaTime);
+
         // Update lighting system
         this.lightingSystem.update(deltaTime);
     }
@@ -360,6 +370,7 @@ class ChristmasApp {
         this.ground?.dispose();
         this.giftBoxes?.dispose();
         this.snowSystem?.dispose();
+        this.goldParticles?.dispose();
         this.lightingSystem?.dispose();
         this.audioManager?.dispose();
         this.sceneManager?.dispose();
